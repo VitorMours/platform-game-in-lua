@@ -1,34 +1,37 @@
 local gerenciadorMapas = require("modules.maps")
+local player = require("modules.player")
+local SCALE = 3
 
--- Called only one time
 function love.load()
-  gerenciadorMapas:loadTileSet("media/map/tiles")
-  gerenciadorMapas.mapaAtivo = "start"
+    love.window.setTitle("RogueLike")
+    love.window.setFullscreen(true)
 
-  love.window.setFullscreen(true)
-  fullscreen_modes = love.window.getFullscreenModes(1)
-  -- love.window.setMode(1)  
-  --for k, v in ipairs(fullscreen_modes) do 
-    --print(k)
-    --print(v)
-    --print(v.height .. " & " .. v.width)
 
-  --end
+    love.graphics.setDefaultFilter("nearest", "nearest")
+
+    -- Carrega mapas
+    gerenciadorMapas:loadTileSet("media/map/tiles")
+    gerenciadorMapas.mapaAtivo = "start"
+
+
+
+    player:load()
 end 
 
--- Updating the screen
+function love.update(dt)
+    dt = math.min(dt, 0.016)
+
+    player:move(dt)
+    player:update(dt)
+end
+
 function love.draw()
-  gerenciadorMapas:drawMap(gerenciadorMapas.mapaAtivo)
+    love.graphics.scale(SCALE, SCALE)
+
+    gerenciadorMapas:drawMap(gerenciadorMapas.mapaAtivo)
+    player:draw()
 end
 
-
-function love.quit() 
-  love.window.close()
+function love.quit()
+    love.window.close()
 end
-
--- Game loop
-function love.update(dt) 
-
-end
-
-

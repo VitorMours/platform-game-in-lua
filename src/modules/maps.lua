@@ -36,7 +36,6 @@ function gerenciadorMapas:drawMap(map_name)
     local map = self.maps[map_name]
     for rowIndex, row in ipairs(map) do 
         for colIndex, tile in ipairs(row) do 
-            -- print("Drawing the tile at [" .. rowIndex .. " & ".. colIndex .. "]")
             local tileImage = self.tilesets[tile + 1]
             love.graphics.draw(tileImage, ((colIndex-1) * self.TILE_SIZE),((rowIndex-1) * self.TILE_SIZE))
         end
