@@ -1,4 +1,6 @@
 local anim8 = require("utils.anim8")
+local gerenciadorMapas = require("modules.maps")
+
 local player = {
 	position = {
 		x = 100,
@@ -56,10 +58,10 @@ end
 function player:move(dt)
     local dx, dy = 0, 0
 
-    if love.keyboard.isDown("a", "left") then dx = dx - 1 end
+    if love.keyboard.isDown("a", "left")  then dx = dx - 1 end
     if love.keyboard.isDown("d", "right") then dx = dx + 1 end
-    if love.keyboard.isDown("w", "up") then dy = dy - 1 end
-    if love.keyboard.isDown("s", "down") then dy = dy + 1 end
+    if love.keyboard.isDown("w", "up")    then dy = dy - 1 end
+    if love.keyboard.isDown("s", "down")  then dy = dy + 1 end
 
     local length = math.sqrt(dx * dx + dy * dy)
 
@@ -75,15 +77,31 @@ function player:move(dt)
         self.state = "idle"
     end
 
-    self.currentAnimation =
-        self.animations[self.state][self.direction]
+    self.currentAnimation = self.animations[self.state][self.direction]
 
-    self.position.x = self.position.x + dx * self.speed * dt
-    self.position.y = self.position.y + dy * self.speed * dt
+    -- calcula próxima posição
+    local nextX = self.position.x + dx * self.speed * dt
+    local nextY = self.position.y + dy * self.speed * dt
+
+    -- limites do mapa
+    local mapW, mapH = gerenciadorMapas:getMapSize(gerenciadorMapas.mapaAtivo)
+
+    local playerW = 32
+    local playerH = 32
+
+    -- trava dentro do mapa
+    self.position.x = math.max(8, math.min(nextX, mapW - (playerW / 2)))
+    self.position.y = math.max(16, math.min(nextY, mapH - (playerW / 2)))
 end
 
 function player:update(dt)
     self.currentAnimation:update(dt)
+end
+
+
+function player:returnPosition()
+
+	return self.position.x, self.position.y
 end
 
 function player:draw()
@@ -94,8 +112,8 @@ function player:draw()
 		0,
 		self.scaleX,
 		1,
-		64,
-		64
+		32,
+		32
 	)
 end
 

@@ -6,20 +6,14 @@
 --]]
 
 local TILE_SIZE = 32 -- correto seria 32
-local TILESET_PATH = "media/map/tiles/"
+local MAP_TILE_PATH = "media/map/tiles/"
+
+local maps_object = require("media.map.tileset.tilesets")
 local gerenciadorMapas = {
     TILE_SIZE = TILE_SIZE,
     mapaAtivo = nil,
-    TILESET_PATH = TILESET_PATH,
-    maps = {
-        start = { 
-            {0,5,3,9,0},
-            {0,5,3,9,0},
-            {0,5,3,9,0},
-            {0,5,3,9,0},
-            {0,5,3,9,0}
-        }
-    },
+    MAP_TILE_PATH = MAP_TILE_PATH,
+    maps = maps_object,
     tilesets = {}
 }
 
@@ -32,16 +26,46 @@ function gerenciadorMapas:loadTileSet(path)
     end
 end
 
-function gerenciadorMapas:drawMap(map_name)
-    local map = self.maps[map_name]
-    for rowIndex, row in ipairs(map) do 
-        for colIndex, tile in ipairs(row) do 
-            local tileImage = self.tilesets[tile + 1]
-            love.graphics.draw(tileImage, ((colIndex-1) * self.TILE_SIZE),((rowIndex-1) * self.TILE_SIZE))
+function gerenciadorMapas:drawMapLayer(layer)
+    for rowIndex, row in ipairs(layer.data) do
+        for colIndex, tileIndex in ipairs(row) do
+            local tileImage = self.tilesets[tileIndex + 1]
+            if tileImage then
+                love.graphics.draw(
+                    tileImage,
+                    (colIndex - 1) * self.TILE_SIZE,
+                    (rowIndex - 1) * self.TILE_SIZE
+                )
+            end
         end
     end
-
 end
+
+function gerenciadorMapas:drawMap(mapName)
+	local map = self.maps[mapName]
+	if not map or not self.maps[mapName] then return end
+
+	table.sort(map.layers, 
+		function(a, b) 
+			return a.priority < b.priority
+		end
+	)
+	for _, layer in ipairs(map.layers) do 
+		self:drawMapLayer(layer)
+	end
+end
+
+function gerenciadorMapas:getMapSize(mapName)
+    local map = self.maps[mapName]
+    if not map then return 0, 0 end
+
+    local layer = map.layers[1]
+    local rows = #layer.data
+    local cols = #layer.data[1]
+
+    return cols * self.TILE_SIZE, rows * self.TILE_SIZE
+end
+
 
 
 return gerenciadorMapas
